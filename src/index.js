@@ -10,7 +10,7 @@ class Crawler {
     this.page
     this.browser
     this.defaultOptions = {
-      headless: false,
+      headless: true,
     };
     
     this.amazonOptions = {
