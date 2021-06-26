@@ -3,19 +3,18 @@
 const puppeteer = require('puppeteer')
 var inquirer = require('inquirer');
 
+const defaultOptions = {
+  headless: true,
+};
+
+const amazonOptions = {
+  headless: false,
+};
 
 class Crawler {
-
-  constructor() {
-    this.page
-    this.browser
-    this.defaultOptions = {
-      headless: true,
-    };
-    
-    this.amazonOptions = {
-      headless: false,
-    };
+  page
+  browser 
+  constructor() {       
   }
 
   delay(time) {
@@ -24,50 +23,14 @@ class Crawler {
     });
  }
 
- createBrowser(browserOptions){
-  return new Promise(function(resolve,reject) { 
-      if (browserOptions == null){
-        browserOptions = this.defaultOptions
-      }
-
-      try{
-        this.browser = await puppeteer.launch(this.defaultOptions);
-        resolve()
-      }catch (error){
-        reject(error)
-      }           
-  });
- }
-
- closeBrowser(){
-  return new Promise(function(resolve,reject) {
-      try{
-        this.browser.close()
-        resolve()
-      }catch (error){
-        reject(error)
-      }           
-  });
- }
-
- createPage(){
-  return new Promise(function(resolve,reject) {
-    try{
-      this.page = await this.browser.newPage();
-    }catch (error){
-      reject(error)
-    }     
-    resolve(this.page)
-  });
- }
-
   crawlforGenres() {
     return new Promise((resolve, reject) => {      
       (async () => {
         try
         {
-          await this.createBrowser()
-          await this.createPage()
+
+          this.browser = await puppeteer.launch();
+          this.page = await this.browser.newPage();
 
           await this.page.goto('https://www.goodreads.com/choiceawards/best-books-2020')
           this.page.waitForSelector('img')
@@ -100,7 +63,7 @@ class Crawler {
             if(linkText == genreName)
             {            
   
-              let parent = (await values[i].$x('..'))[0]; // Element Parent
+              let parent = (await values[i].$x('..'))[0]
   
               let bookName = await parent.$eval('.category__winnerImage', el => el.getAttribute('alt'));
   
@@ -108,8 +71,7 @@ class Crawler {
             }
           }
 
-          this.closeBrowser();
-  
+          this.browser.close()  
           resolve(values)
         }catch(error){
           reject(error)
@@ -124,9 +86,9 @@ class Crawler {
       (async () => {
 
         try{
-          await this.createBrowser(this.amazonOptions);
-        
-          await this.createPage();
+
+          this.browser = await puppeteer.launch(amazonOptions);
+          this.page = await this.browser.newPage();
   
           await this.page.goto('https://www.amazon.com')        
   
